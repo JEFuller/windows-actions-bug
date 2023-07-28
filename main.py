@@ -1,4 +1,5 @@
 from multiprocessing import freeze_support
+from sys import platform
 from threading import Thread
 from time import sleep
 import click
@@ -16,6 +17,17 @@ class Runner(object):
             sleep(1)
 
     def stop(self):
+        if platform == "win32":
+            from signal import CTRL_C_EVENT  # type: ignore
+            from win32api import SetConsoleCtrlHandler  # type: ignore
+
+            def ctrl_handler(_n: int):
+                print("Caught Ctrl-C")
+                return True
+
+            SetConsoleCtrlHandler(ctrl_handler, True)
+
+            kill(getpid(), CTRL_C_EVENT)  # type: ignore
         self.running = False
 
 
