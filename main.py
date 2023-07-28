@@ -3,6 +3,7 @@ from sys import platform
 from threading import Thread
 from time import sleep
 import click
+from os import getpid, kill
 
 
 class Runner(object):
