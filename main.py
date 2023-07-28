@@ -1,9 +1,10 @@
 from multiprocessing import freeze_support
-from sys import platform
+from os import getpid, kill
+from signal import CTRL_C_EVENT
 from threading import Thread
 from time import sleep
-import click
-from os import getpid, kill
+
+from win32api import SetConsoleCtrlHandler
 
 
 class Runner(object):
@@ -18,33 +19,29 @@ class Runner(object):
             sleep(1)
 
     def stop(self):
-        if platform == "win32":
-            from signal import CTRL_C_EVENT  # type: ignore
-            from win32api import SetConsoleCtrlHandler  # type: ignore
 
-            def ctrl_handler(_n: int):
-                print("Caught Ctrl-C")
-                return True
+        def ctrl_handler(_n: int):
+            print("Caught Ctrl-C")
+            return True
 
-            SetConsoleCtrlHandler(ctrl_handler, True)
+        SetConsoleCtrlHandler(ctrl_handler, True)
 
-            kill(getpid(), CTRL_C_EVENT)  # type: ignore
+        kill(getpid(), CTRL_C_EVENT)
         self.running = False
 
 
-@click.command()
 def hello():
 
     def _test():
-        click.secho("Waiting", fg="blue")
+        print('Starting test')
         sleep(5)
-        click.secho("Stopping", fg="blue")
+        print('Stopping runner')
         runner.stop()
 
     t = Thread(target=_test)
     t.start()
 
-    click.secho("Starting runner", fg="blue")
+    print('Starting runner')
     runner = Runner()
     runner.run()
 
